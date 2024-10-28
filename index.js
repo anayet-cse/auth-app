@@ -28,6 +28,14 @@ app.post('/users', async function(req, res) {
     const {firstName, lastName, nid,
         profilePhoto, age, maritalStatus, email, password
     } = req.body;
+    
+    const user_email = await query('SELECT email FROM auth WHERE email = ?', [email]);
+    
+    if (user_email.length > 0) {
+      return res.status(400).send({
+        "message": "Already registered with this email account."
+      });
+    }
 
     await query(
         'INSERT INTO users (firstName, lastName, nid, profilePhoto, age, maritalStatus) VALUES (?, ?, ?, ?, ?, ?)', 
