@@ -1,7 +1,10 @@
 const util = require('util');
-const crypto = require('crypto-js');
+const multer = require('multer');
+const path = require('path');
 const bcrypt = require('bcryptjs');
 const express = require('express');
+const crypto = require('crypto-js');
+
 const bodyParser = require('body-parser');
 const db = require('./src/config/db');
 const ApiResponseMessage = require('./utils/utils')
@@ -29,6 +32,29 @@ db.connect((err) => {
 app.listen(port, ()=> {
   console.log(`app is running at ${port}`);
 });
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  }
+});
+
+const upload = multer({ storage });
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+app.post('/upload', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No file uploaded.');
+  }
+
+  const { filename } = req.file;
+
+  res.status(200).send(`File uploaded successfully: ${filename}`);
+});
+
 
 app.post('/users', async function(req, res) {
   try {
