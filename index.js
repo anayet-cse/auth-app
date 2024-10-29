@@ -1,4 +1,6 @@
 const util = require('util');
+const crypto = require('crypto-js');
+const bcrypt = require('bcryptjs');
 const express = require('express');
 const bodyParser = require('body-parser');
 const db = require('./src/config/db');
@@ -10,6 +12,8 @@ const query = util.promisify(db.query).bind(db);
 const beginTransaction = util.promisify(db.beginTransaction).bind(db);
 const commit = util.promisify(db.commit).bind(db);
 const rollback = util.promisify(db.rollback).bind(db);
+
+const SALT = 2;
 
 const app = express();
 app.use(bodyParser.json());
@@ -45,9 +49,12 @@ app.post('/users', async function(req, res) {
         'INSERT INTO users (firstName, lastName, nid, profilePhoto, age, maritalStatus) VALUES (?, ?, ?, ?, ?, ?)', 
         [firstName, lastName, nid, profilePhoto, age, maritalStatus]
     );
+    
+    const hashPassword = await bcrypt.hashSync(password, SALT);
+
     await query(
         'INSERT INTO auth (email, password) VALUES (?, ?)', 
-        [email, password]
+        [email, hashPassword]
     );
     await commit();
 
