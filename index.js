@@ -9,7 +9,7 @@ const bodyParser = require('body-parser');
 const db = require('./src/config/db');
 const ApiResponseMessage = require('./utils/utils')
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 
 const query = util.promisify(db.query).bind(db);
 const beginTransaction = util.promisify(db.beginTransaction).bind(db);
@@ -130,5 +130,33 @@ app.put('/users/:users_email', async function(req, res) {
     console.log(error)
     await rollback();
     res.status(400).ApiResponseMessage.BAD_REQUEST
+  }
+});
+
+
+app.delete('/users/:email', async function(req, res) {
+ 
+  try {
+    const email = req.params.email;
+    const user_email = await query('SELECT email FROM auth WHERE email = ?', [email]);
+    if(user_email.length == 0) {
+      await rollback();
+      res.status(400).send({
+        "message": "There is no account with this email."
+      })
+    } 
+    
+    const id = await query('SELECT id FROM auth WHERE email = ?', [email]);
+    console.log(id);
+    await query('DELETE FROM auth WHERE email = ?', 
+      [email]);
+    await query('DELETE FROM users WHERE auth_id = ?', [id]);
+    await commit();
+  } catch (error) {
+    console.log(error);
+    await rollback();
+    res.status(400).send({
+      message: "Successfully delete your account"
+    })
   }
 });
