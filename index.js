@@ -70,27 +70,65 @@ app.post('/users', async function(req, res) {
         "message": "Already registered with this email account."
       });
     }
-
-    await query(
-        'INSERT INTO users (firstName, lastName, nid, profilePhoto, age, maritalStatus) VALUES (?, ?, ?, ?, ?, ?)', 
-        [firstName, lastName, nid, profilePhoto, age, maritalStatus]
-    );
-    
     const hashPassword = await bcrypt.hashSync(password, SALT);
 
-    await query(
-        'INSERT INTO auth (email, password) VALUES (?, ?)', 
-        [email, hashPassword]
+    const temp = await query(
+      'INSERT INTO auth (email, password) VALUES (?, ?)', 
+      [email, hashPassword]
     );
+    console.log(temp);
+
+    await query(
+        'INSERT INTO users (auth_id, firstName, lastName, nid, profilePhoto, age, maritalStatus) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+        [temp.insertId, firstName, lastName, nid, profilePhoto, age, maritalStatus]
+    );
+    
+    
+
     await commit();
 
     res.status(201).send({
         "message": ApiResponseMessage.USER_CREATE
     });
   } catch (error) {
+    console.log(error)
     await rollback();
     res.status(400).send({
-        "message": ApiResponseMessage.SYSTEM_ERROR
+      "message": ApiResponseMessage.SYSTEM_ERROR
     });
+  }
+});
+
+
+app.put('/users/:users_email', async function(req, res) {
+  try {
+    await beginTransaction();
+    const email = req.params.users_email; 
+
+    user_email = await query('SELECT email FROM auth WHERE email = ?', [email]);
+
+    if(user_email.length == 0) {
+      await rollback();
+      res.status(400).send({
+        "message": "There is no account with this email."
+      })
+    }
+
+    const auth_id = await query('SELECT id FROM auth WHERE email = ?', [email]);
+  
+    const {firstName, lastName} = req.body;
+
+    await query('UPDATE users SET firstName = ?, lastName = ? WHERE auth_id = ?', 
+      [firstName, lastName, auth_id[0].id]);
+    
+    await commit();
+
+    res.status(200).send({
+      message: ApiResponseMessage.USER_UPDATE
+    });
+  } catch(error) {
+    console.log(error)
+    await rollback();
+    res.status(400).ApiResponseMessage.BAD_REQUEST
   }
 });
