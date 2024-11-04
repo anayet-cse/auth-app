@@ -45,22 +45,15 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-app.post('/upload', upload.single('file'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send('No file uploaded.');
-  }
 
-  const { filename } = req.file;
-
-  res.status(200).send(`File uploaded successfully: ${filename}`);
-});
-
-
-app.post('/users', async function(req, res) {
+app.post('/users', upload.single('profilePhoto'), async (req, res) => {
   try {
     await beginTransaction();
+    let { filename } = req.file;
+    let filePath = __dirname + '/'+ filename;
+    
     const {firstName, lastName, nid,
-        profilePhoto, age, maritalStatus, email, password
+           age, maritalStatus, email, password
     } = req.body;
     
     const userEmail = await query('SELECT email FROM auth WHERE email = ?', [email]);
@@ -80,10 +73,8 @@ app.post('/users', async function(req, res) {
 
     await query(
         'INSERT INTO users (auth_id, firstName, lastName, nid, profilePhoto, age, maritalStatus) VALUES (?, ?, ?, ?, ?, ?, ?)', 
-        [temp.insertId, firstName, lastName, nid, profilePhoto, age, maritalStatus]
+        [temp.insertId, firstName, lastName, nid, filePath, age, maritalStatus]
     );
-    
-    
 
     await commit();
 
