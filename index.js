@@ -137,6 +137,7 @@ app.put('/users/:users_email', async function(req, res) {
 app.delete('/users/:email', async function(req, res) {
  
   try {
+    await beginTransaction();
     const email = req.params.email;
     const user_email = await query('SELECT email FROM auth WHERE email = ?', [email]);
     if(user_email.length == 0) {
@@ -155,8 +156,33 @@ app.delete('/users/:email', async function(req, res) {
   } catch (error) {
     console.log(error);
     await rollback();
-    res.status(400).send({
+    res.status(404).send({
       message: "Successfully delete your account"
     })
+  }
+});
+
+app.get('/users/:users_email', async function(req, res) {
+  try {
+    await beginTransaction();
+    const email = req.params.users_email;
+    const users_email = await query('SELECT email FROM auth WHERE email = ?', [email]);
+    if(users_email.length == 0) {
+      await rollback();
+      res.status(404).send({
+        message: "There is no account with this email acoount"
+      })
+    }
+  
+    const userId = await query('SELECT id FROM auth WHERE email = ?', [email]);
+    console.log(userId)
+    const user = await query('SELECT firstName, lastName, nid, profilePhoto, age, maritalStatus FROM users WHERE auth_id = ?', [userId[0].id]);
+    console.log(user);
+    res.json(user);
+    res.status(200);
+    await commit();
+  } catch (error) {
+    console.log(error);
+    await rollback();
   }
 });
