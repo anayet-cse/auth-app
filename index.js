@@ -21,8 +21,8 @@ const SALT = 2;
 const app = express();
 app.use(bodyParser.json());
 
-db.connect((err) => {
-  if (err) {
+db.connect((error) => {
+  if (error) {
     console.error('Error connecting mysql');
     return;
   }
@@ -63,8 +63,8 @@ app.post('/users', async function(req, res) {
         profilePhoto, age, maritalStatus, email, password
     } = req.body;
     
-    const user_email = await query('SELECT email FROM auth WHERE email = ?', [email]);
-    if (user_email.length > 0) {
+    const userEmail = await query('SELECT email FROM auth WHERE email = ?', [email]);
+    if (userEmail.length > 0) {
       await rollback();
       return res.status(400).send({
         "message": "Already registered with this email account."
@@ -105,21 +105,21 @@ app.put('/users/:users_email', async function(req, res) {
     await beginTransaction();
     const email = req.params.users_email; 
 
-    user_email = await query('SELECT email FROM auth WHERE email = ?', [email]);
+    userEmail = await query('SELECT email FROM auth WHERE email = ?', [email]);
 
-    if(user_email.length == 0) {
+    if(userEmail.length == 0) {
       await rollback();
       res.status(400).send({
         "message": "There is no account with this email."
       })
     }
 
-    const auth_id = await query('SELECT id FROM auth WHERE email = ?', [email]);
+    const authId = await query('SELECT id FROM auth WHERE email = ?', [email]);
   
     const {firstName, lastName} = req.body;
 
     await query('UPDATE users SET firstName = ?, lastName = ? WHERE auth_id = ?', 
-      [firstName, lastName, auth_id[0].id]);
+      [firstName, lastName, authId[0].id]);
     
     await commit();
 
@@ -139,8 +139,8 @@ app.delete('/users/:email', async function(req, res) {
   try {
     await beginTransaction();
     const email = req.params.email;
-    const user_email = await query('SELECT email FROM auth WHERE email = ?', [email]);
-    if(user_email.length == 0) {
+    const userEmail = await query('SELECT email FROM auth WHERE email = ?', [email]);
+    if(userEmail.length == 0) {
       await rollback();
       res.status(400).send({
         "message": "There is no account with this email."
@@ -166,8 +166,8 @@ app.get('/users/:users_email', async function(req, res) {
   try {
     await beginTransaction();
     const email = req.params.users_email;
-    const users_email = await query('SELECT email FROM auth WHERE email = ?', [email]);
-    if(users_email.length == 0) {
+    const userEmail = await query('SELECT email FROM auth WHERE email = ?', [email]);
+    if(userEmail.length == 0) {
       await rollback();
       res.status(404).send({
         message: "There is no account with this email acoount"
