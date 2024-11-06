@@ -93,34 +93,28 @@ app.post('/users', upload.single('profilePhoto'), async (req, res) => {
 
 app.put('/users/:users_email', async function(req, res) {
   try {
-    await beginTransaction();
     const email = req.params.users_email; 
 
-    userEmail = await query('SELECT email FROM auth WHERE email = ?', [email]);
-
-    if(userEmail.length == 0) {
-      await rollback();
-      res.status(400).send({
+    const user = await query('SELECT email,id FROM auth WHERE email = ?', [email]);
+     console.log(user)
+    if(user.length == 0) {
+      return res.status(400).send({
         "message": "There is no account with this email."
       })
     }
-
-    const authId = await query('SELECT id FROM auth WHERE email = ?', [email]);
   
     const {firstName, lastName} = req.body;
 
     await query('UPDATE users SET firstName = ?, lastName = ? WHERE auth_id = ?', 
-      [firstName, lastName, authId[0].id]);
+      [firstName, lastName, user[0].id]);
     
-    await commit();
 
     res.status(200).send({
       message: ApiResponseMessage.USER_UPDATE
     });
   } catch(error) {
-    console.log(error)
-    await rollback();
-    res.status(400).ApiResponseMessage.BAD_REQUEST
+    console.log(`==================`,error);
+    return res.status(500).json({ error: "Email and message are required." });
   }
 });
 
