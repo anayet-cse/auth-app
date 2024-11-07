@@ -3,20 +3,20 @@ const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const express = require('express');
-const crypto = require('crypto-js');
+const crypto = require('crypto');
 
 const bodyParser = require('body-parser');
 const db = require('./src/config/db');
 const ApiResponseMessage = require('./utils/utils')
 
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 const query = util.promisify(db.query).bind(db);
 const beginTransaction = util.promisify(db.beginTransaction).bind(db);
 const commit = util.promisify(db.commit).bind(db);
 const rollback = util.promisify(db.rollback).bind(db);
 
-const SALT = 2;
+const SALT = 8;
 
 const app = express();
 app.use(bodyParser.json());
@@ -49,8 +49,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.post('/users', upload.single('profilePhoto'), async (req, res) => {
   try {
     await beginTransaction();
-    let { filename } = req.file;
-    let filePath = __dirname + '/'+ filename;
+    const { filename } = req.file;
+    const filePath = __dirname + '/'+ filename;
     
     const {firstName, lastName, nid,
            age, maritalStatus, email, password
@@ -89,6 +89,38 @@ app.post('/users', upload.single('profilePhoto'), async (req, res) => {
     });
   }
 });
+
+
+app.post('/users/login', async function(req, res){
+  try {
+    const {email, password} = req.body;
+
+    const user = await query('SELECT email, password FROM auth WHERE email = ?', [email]);
+    console.log(user);
+    if(user.length == 0) {
+      return res.status(400).send({
+        'message': 'There is no account with this email.' 
+      })
+    }
+
+    const passwordIsValid = bcrypt.compareSync(password, user[0].password);
+    if(!passwordIsValid) {
+      return res.status(400).send({
+        'message': 'invalid email or password.'
+      });
+    }
+
+    const authToken = crypto.randomBytes(16).toString("hex");
+    console.log(authToken);
+
+    const token = await query('UPDATE auth SET auth_token = ? WHERE email = ?', [authToken, email]);
+    res.status(200).json(authToken);
+    // await commit();
+  } catch(err) {
+    console.log(`==================`,err);
+    return res.status(500).json({ err: "Internal Server Error." });
+  }
+})
 
 
 app.put('/users/:users_email', async function(req, res) {
