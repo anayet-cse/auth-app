@@ -52,8 +52,9 @@ app.post('/users', upload.single('profilePhoto'), async (req, res) => {
     const { filename } = req.file;
     const filePath = __dirname + '/'+ filename;
     
-    const {firstName, lastName, nid,
-           age, maritalStatus, email, password
+    const {
+      firstName, lastName, nid,
+      age, maritalStatus, email, password
     } = req.body;
     
     const userEmail = await query('SELECT email FROM auth WHERE email = ?', [email]);
@@ -63,13 +64,13 @@ app.post('/users', upload.single('profilePhoto'), async (req, res) => {
         "message": "Already registered with this email account."
       });
     }
+
     const hashPassword = await bcrypt.hashSync(password, SALT);
 
     const temp = await query(
       'INSERT INTO auth (email, password) VALUES (?, ?)', 
       [email, hashPassword]
     );
-    console.log(temp);
 
     await query(
         'INSERT INTO users (auth_id, firstName, lastName, nid, profilePhoto, age, maritalStatus) VALUES (?, ?, ?, ?, ?, ?, ?)', 
@@ -82,7 +83,6 @@ app.post('/users', upload.single('profilePhoto'), async (req, res) => {
         "message": ApiResponseMessage.USER_CREATE
     });
   } catch (error) {
-    console.log(error)
     await rollback();
     res.status(400).send({
       "message": ApiResponseMessage.SYSTEM_ERROR
@@ -106,7 +106,7 @@ app.post('/users/login', async function(req, res){
     const passwordIsValid = bcrypt.compareSync(password, user[0].password);
     if(!passwordIsValid) {
       return res.status(400).send({
-        'message': 'invalid email or password.'
+        'message': 'Invalid email or password.'
       });
     }
 
@@ -132,7 +132,7 @@ app.put('/users/:auth_token', async function(req, res) {
       })
     }
   
-    const {firstName, lastName, nid, profilePhoto, age, maritalStatus} = req.body;
+    const {firstName, lastName, nid, age, maritalStatus} = req.body;
 
     await query('UPDATE users SET firstName = ?, lastName = ?, nid = ?, age = ?, maritalStatus = ? WHERE auth_id = ?', 
       [firstName, lastName, nid, age, maritalStatus, user[0].id]);
@@ -153,7 +153,7 @@ app.delete('/users/:auth_token', async function(req, res) {
     const authToken = req.params.auth_token;
     const user = await query('SELECT id, email FROM auth WHERE auth_token = ?', [authToken]);
 
-    if(user.length === 0) {
+    if (user.length === 0) {
       await rollback();
       return res.status(400).send({
         "message": "Login First."
@@ -176,23 +176,22 @@ app.delete('/users/:auth_token', async function(req, res) {
   }
 });
 
+
 app.get('/users/:auth_token', async function(req, res) {
   try {
     const authToken = req.params.auth_token;
     const user = await query('SELECT id, email, auth_token FROM auth WHERE auth_token = ?', [authToken]);
 
-    if(user.length === 0) {
+    if (user.length === 0) {
       return res.status(400).send({
         message: "Login First."
       })
     }
     
     const userData = await query('SELECT firstName, lastName, nid, profilePhoto, age, maritalStatus FROM users WHERE auth_id = ?', [user[0].id]);
-    console.log(userData);
     res.json(userData);
     res.status(200);
   } catch (error) {
-    console.log(error);
     await rollback();
     res.status(500).send({
       message: "Internal sever error."
