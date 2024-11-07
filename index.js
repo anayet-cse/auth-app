@@ -115,91 +115,87 @@ app.post('/users/login', async function(req, res){
 
     const token = await query('UPDATE auth SET auth_token = ? WHERE email = ?', [authToken, email]);
     res.status(200).json(authToken);
-    // await commit();
   } catch(err) {
-    console.log(`==================`,err);
     return res.status(500).json({ err: "Internal Server Error." });
   }
 })
 
 
-app.put('/users/:users_email', async function(req, res) {
+app.put('/users/:auth_token', async function(req, res) {
   try {
-    const email = req.params.users_email; 
+    const authToken = req.params.auth_token; 
 
-    const user = await query('SELECT email,id FROM auth WHERE email = ?', [email]);
-     console.log(user)
-    if(user.length == 0) {
+    const user = await query('SELECT id, email FROM auth WHERE auth_token = ?', [authToken]);
+    if(user.length === 0) {
       return res.status(400).send({
-        "message": "There is no account with this email."
+        "message": "Login First."
       })
     }
   
-    const {firstName, lastName} = req.body;
+    const {firstName, lastName, nid, profilePhoto, age, maritalStatus} = req.body;
 
-    await query('UPDATE users SET firstName = ?, lastName = ? WHERE auth_id = ?', 
-      [firstName, lastName, user[0].id]);
-    
+    await query('UPDATE users SET firstName = ?, lastName = ?, nid = ?, age = ?, maritalStatus = ? WHERE auth_id = ?', 
+      [firstName, lastName, nid, age, maritalStatus, user[0].id]);
 
     res.status(200).send({
       message: ApiResponseMessage.USER_UPDATE
     });
   } catch(error) {
-    console.log(`==================`,error);
-    return res.status(500).json({ error: "Email and message are required." });
+    return res.status(500).json({ error: "Internal Server Error." });
   }
 });
 
 
-app.delete('/users/:email', async function(req, res) {
- 
+app.delete('/users/:auth_token', async function(req, res) {
   try {
     await beginTransaction();
-    const email = req.params.email;
-    const userEmail = await query('SELECT email FROM auth WHERE email = ?', [email]);
-    if(userEmail.length == 0) {
+    
+    const authToken = req.params.auth_token;
+    const user = await query('SELECT id, email FROM auth WHERE auth_token = ?', [authToken]);
+
+    if(user.length === 0) {
       await rollback();
-      res.status(400).send({
-        "message": "There is no account with this email."
+      return res.status(400).send({
+        "message": "Login First."
       })
     } 
     
-    const id = await query('SELECT id FROM auth WHERE email = ?', [email]);
-    console.log(id);
-    await query('DELETE FROM auth WHERE email = ?', 
-      [email]);
-    await query('DELETE FROM users WHERE auth_id = ?', [id]);
+    await query('DELETE FROM auth WHERE email = ?', [user[0].email]);
+    await query('DELETE FROM users WHERE auth_id = ?', [user[0].id]);
+
     await commit();
-  } catch (error) {
-    console.log(error);
-    await rollback();
-    res.status(404).send({
+
+    return res.status(500).send({
       message: "Successfully delete your account"
+    });
+  } catch (error) {
+    await rollback();
+    return res.status(500).send({
+      message: "Internal Server Error."
     })
   }
 });
 
-app.get('/users/:users_email', async function(req, res) {
+app.get('/users/:auth_token', async function(req, res) {
   try {
-    await beginTransaction();
-    const email = req.params.users_email;
-    const userEmail = await query('SELECT email FROM auth WHERE email = ?', [email]);
-    if(userEmail.length == 0) {
-      await rollback();
-      res.status(404).send({
-        message: "There is no account with this email acoount"
+    const authToken = req.params.auth_token;
+    const user = await query('SELECT id, email, auth_token FROM auth WHERE auth_token = ?', [authToken]);
+
+    if(user.length === 0) {
+      return res.status(400).send({
+        message: "Login First."
       })
     }
-  
-    const userId = await query('SELECT id FROM auth WHERE email = ?', [email]);
-    console.log(userId)
-    const user = await query('SELECT firstName, lastName, nid, profilePhoto, age, maritalStatus FROM users WHERE auth_id = ?', [userId[0].id]);
-    console.log(user);
-    res.json(user);
+    
+    const userData = await query('SELECT firstName, lastName, nid, profilePhoto, age, maritalStatus FROM users WHERE auth_id = ?', [user[0].id]);
+    console.log(userData);
+    res.json(userData);
     res.status(200);
-    await commit();
   } catch (error) {
     console.log(error);
     await rollback();
+    res.status(500).send({
+      message: "Internal sever error."
+    })
   }
 });
