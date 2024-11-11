@@ -1,25 +1,7 @@
-const mysql = require('mysql2');
-
-const db = mysql.createConnection({
+const Sequelize = require('sequelize');
+const db = new Sequelize('authApp', 'root', 'YourSecurePassword', {
   host: 'localhost',
-  user: 'root',
-  password: 'YourSecurePassword',
-  database: 'authApp'
+  dialect: 'mysql' 
 });
 
 module.exports = db;
-
-
-// const Sequelize = require('sequelize');
-
-// const db = new Sequelize(
-//   process.env.DB_NANE,
-//   process.env.DB_USER,
-//   process.DB_PASSWORD, 
-//   {
-//     host: process.env.DB_HOST,
-//     dialect: 'mysql'
-//   }
-// );
-
-// module.exports = db;

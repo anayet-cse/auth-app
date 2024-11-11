@@ -1,29 +1,42 @@
-// const dataTypes = require('sequelize');
-// const sequelize = require('sequelize');
+const dataTypes = require('sequelize');
+const sequelize = require('../config/db');
 
-// const Auth = sequelize.define(
-//   'auth',
-//     {
-//       email: {
-//         type: dataTypes.STRING,
-//         allowNull: false,
-//         unique: true,
-//         validate: {
-//             isEmail: true,
-//         },
-//       },
-//       password: {
-//         type: dataTypes.STRING,
-//         allowNull: false,
-//       },
-//       auth_token: {
-//         type: dataTypes.STRING,
-//         allowNull: true,
-//       },
-//     },
-// );
+const Auth = sequelize.define(
+  'auths',
+  {
+    createdAt: {
+      type: dataTypes.DATE,
+    },
+    updatedAt: {
+      type: dataTypes.DATE,
+    },
+    id: {
+      type: dataTypes.INTEGER,
+      autoIncrement: true,
+      allowNull: false,
+      primaryKey: true
+    },
+    email: {
+      type: dataTypes.STRING,
+      allowNull: false,
+      validate: {
+        isEmail: true,
+      },
+    },
+    password: {
+      type: dataTypes.STRING,
+      allowNull: false,
+    },
+    auth_token: {
+      type: dataTypes.STRING,
+      allowNull: true,
+    },
+  }
+);
 
-// module.exports = Auth;
+module.exports = Auth;
+
+
 
 
 
