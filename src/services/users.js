@@ -109,9 +109,9 @@ const deleteUser = async (req, res) => {
     } 
   });
   if (!user) {
-    return res.status(400).send({
-        'message': 'Login First.'
-    });
+    return {status: 400, message: {
+      'message': 'Login First.'
+    }};
   }
 
   await Auth.destroy({ 
