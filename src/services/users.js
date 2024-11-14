@@ -79,14 +79,14 @@ const updateUser = async (req, res) => {
   const { auth_token } = req.params;
   const user = await Auth.findOne({ 
     where: { 
-      auth_token 
+      auth_token
     } 
   });
 
   if (!user) {
-    return res.status(400).send({
-        'message': 'Login First.'
-    });
+    return {status: 400, message: {
+      'message': 'Login First'
+    }};
   }
 
   await User.update(req.body, { 
