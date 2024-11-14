@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const db = require('./config/db');
+const db = require('./infrastructure/db');
 const userRoutes = require('./routes/users');
 
 const app = express();
