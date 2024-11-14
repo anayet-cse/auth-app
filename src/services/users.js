@@ -47,7 +47,6 @@ const loginUser = async (req, res) => {
         email: email 
     } 
   });
-
   if (!user) {
     return { status: 400, message: { 
       message: "Already registered with this email account." 
@@ -84,7 +83,7 @@ const updateUser = async (req, res) => {
   });
 
   if (!user) {
-    return {status: 400, message: {
+    return { status: 400, message: {
       'message': 'Login First'
     }};
   }
@@ -109,7 +108,7 @@ const deleteUser = async (req, res) => {
     } 
   });
   if (!user) {
-    return {status: 400, message: {
+    return { status: 400, message: {
       'message': 'Login First.'
     }};
   }
@@ -134,16 +133,15 @@ const deleteUser = async (req, res) => {
 
 const getUser = async (req, res) => {
   const { auth_token } = req.params;
-
   const user = await Auth.findOne({ 
     where: { 
       auth_token
     } 
   });
   if (!user) {
-    return res.status(400).send({
-       message: 'Login First.'
-    });
+    return { status: 400, message: {
+      'message': 'Login First.'
+    }};
   }
 
   const userData = await User.findOne({ 
@@ -155,4 +153,4 @@ const getUser = async (req, res) => {
   return { status: 200, data: userData };
 };
 
-module.exports = { createUser, loginUser, updateUser, deleteUser, loginUser};
+module.exports = { createUser, loginUser, updateUser, deleteUser, getUser};
