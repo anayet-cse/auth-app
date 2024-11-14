@@ -1,6 +1,5 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-
 const Auth = require('../models/auth');
 const User = require('../models/users');
 const ApiResponseMessage = require('../utils/utils');
