@@ -7,7 +7,7 @@ const ApiResponseMessage = require('../utils/utils');
 
 const SALT = 8;
 
-exports.createUser = async (req, res) => {
+const createUser = async (req, res) => {
   const { email, password, firstName, 
     lastName, nid, age, maritalStatus } = req.body;
   const profilePhoto = req.file.path;
@@ -40,7 +40,7 @@ exports.createUser = async (req, res) => {
 };
 
 
-exports.loginUser = async (req, res) => {
+const loginUser = async (req, res) => {
   const { email, password } = req.body;
   const user = await Auth.findOne({ 
     where: { 
@@ -75,18 +75,18 @@ exports.loginUser = async (req, res) => {
 };
 
 
-exports.updateUser = async (req, res) => {
+const updateUser = async (req, res) => {
   const { auth_token } = req.params;
   const user = await Auth.findOne({ 
     where: { 
-      auth_token 
+      auth_token
     } 
   });
 
   if (!user) {
-    return res.status(400).send({
-        'message': 'Login First.'
-    });
+    return {status: 400, message: {
+      'message': 'Login First'
+    }};
   }
 
   await User.update(req.body, { 
@@ -101,7 +101,7 @@ exports.updateUser = async (req, res) => {
 };
 
 
-exports.deleteUser = async (req, res) => {
+const deleteUser = async (req, res) => {
   const { auth_token } = req.params;
   const user = await Auth.findOne({ 
     where: { 
@@ -109,9 +109,9 @@ exports.deleteUser = async (req, res) => {
     } 
   });
   if (!user) {
-    return res.status(400).send({
-        'message': 'Login First.'
-    });
+    return {status: 400, message: {
+      'message': 'Login First.'
+    }};
   }
 
   await Auth.destroy({ 
@@ -132,7 +132,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 
-exports.getUser = async (req, res) => {
+const getUser = async (req, res) => {
   const { auth_token } = req.params;
 
   const user = await Auth.findOne({ 
@@ -154,3 +154,5 @@ exports.getUser = async (req, res) => {
 
   return { status: 200, data: userData };
 };
+
+module.exports = { createUser, loginUser, updateUser, deleteUser, loginUser};
