@@ -2,7 +2,7 @@ const userService = require('../services/users');
 const ApiResponseMessage = require('../utils/utils');
 
 
-exports.createUser = async (req, res) => {
+const createUser = async (req, res) => {
   try {
     const response = await userService.createUser(req);
     res.status(response.status).send(response.message);
@@ -17,7 +17,7 @@ exports.createUser = async (req, res) => {
 };
 
 
-exports.loginUser = async (req, res) => {
+const loginUser = async (req, res) => {
   try {
     const response = await userService.loginUser(req);
     res.status(response.status).json(response.data);
@@ -32,7 +32,7 @@ exports.loginUser = async (req, res) => {
 };
 
 
-exports.updateUser = async (req, res) => {
+const updateUser = async (req, res) => {
   try {
     const response = await userService.updateUser(req);
     res.status(response.status).send(response.message);
@@ -46,7 +46,7 @@ exports.updateUser = async (req, res) => {
 };
 
 
-exports.deleteUser = async (req, res) => {
+const deleteUser = async (req, res) => {
   try {
     const response = await userService.deleteUser(req);
     res.status(response.status).send(response.message);
@@ -60,7 +60,7 @@ exports.deleteUser = async (req, res) => {
 };
 
 
-exports.getUser = async (req, res) => {
+const getUser = async (req, res) => {
   try {
     const response = await userService.getUser(req);
     res.status(response.status).json(response.data);
@@ -72,3 +72,6 @@ exports.getUser = async (req, res) => {
     });
   }
 };
+
+
+module.exports = {createUser, loginUser, updateUser, deleteUser, getUser};
