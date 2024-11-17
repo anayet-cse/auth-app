@@ -1,43 +1,84 @@
 # auth-app
-Write a application with NodeJs (Express, MySQL)
-1. Create a Registration API which use the following body
-A. first_name
-B. last_name
-C. email
-D. password
-E. NID
-F. profile photo
-G. Age
-H. Current marital status
-I. auth_token
-NB.
-a. Email and Password will be on auth table and the rest are on the profile table
-b. Be ensure that, if one table insertion is failed then the other will not insert(ACID
-properties of DBMS)
-c. password should be encrypted with Crypto Library
-d. For photo upload you can use Multer Library
-e. Store photos in local storage and save the path on table
-f. Use a generic response for failed and success individually
-g. Success code should be 200
-h. You can use `mysql` library for nodejs mysql
-2. Create a Login API which contains the following body
-A. email
-B. password
-NB.
-a. If email and password matched then return a random UUID so that next time we can use
-it for login and store this on auth_token in Auth table
-3. Create an Update api which contains the route like
-“your-local-route/:user_id/”
-And the body will contains the data from your profile table.
-NB. Be sure that one user cannot update data of other users
-4. Create a Delete api so that any one can delete his/her account
-The route will the like the update api
-5. Create an API so that user can see his/her profile
-NB. Make sure that password will not in the responseMISC.
-a. Use Camel-Case or Snake-Case, not mixed up both (Js preferred Camel-case)
-b. Strictly maintain the meaningful variable name and convention like boolean field will like
-this `isActive`, `hasSeen`
-c. Use callback functions
-d. For REST best practice follow this link
-e. For JS clean code follow this link
-f. For Response status code follow this link
+# Node.js (Express, MySQL) API for User Management
+
+## Features
+This project provides the following functionalities:
+1. **Registration API**:
+   - Accepts the following fields in the request body:
+     - `first_name`
+     - `last_name`
+     - `email`
+     - `password`
+     - `nid`
+     - `profile_photo`
+     - `age`
+     - `current_marital_status`
+     - `auth_token`
+   - Implementation Details:
+     - `email` and `password` are stored in the `auth` table.
+     - Other fields are stored in the `profile` table.
+     - Ensures ACID properties:
+       - If any table insertion fails, the other is rolled back.
+     - Password encryption is implemented using the **Crypto Library**.
+     - Photo upload is handled with the **Multer Library**:
+       - Photos are stored locally, and their paths are saved in the database.
+     - Returns:
+       - **200** for success.
+       - Generic responses for success and failure.
+
+2. **Login API**:
+   - Accepts the following fields in the request body:
+     - `email`
+     - `password`
+   - Implementation Details:
+     - Verifies email and password.
+     - On success, generates a random UUID and stores it as `auth_token` in the `auth` table.
+
+3. **Update Profile API**:
+   - Route: `your-local-route/:user_id/`
+   - Accepts profile table fields in the request body.
+   - Ensures only the user can update their data.
+
+4. **Delete Account API**:
+   - Route: `your-local-route/:user_id/`
+   - Allows a user to delete their account.
+
+5. **View Profile API**:
+   - Allows a user to see their profile data.
+   - Ensures the password is excluded from the response.
+
+---
+
+## Coding Standards and Practices
+1. **Naming Conventions**:
+   - Use `camelCase` for all variable names.
+   - Boolean fields follow meaningful conventions like `isActive`, `hasSeen`.
+   
+2. **Error Handling**:
+   - Provide generic responses for both success and failure.
+
+3. **Response Codes**:
+   - Use proper HTTP response codes:
+     - **200** for success.
+     - Appropriate codes for failure based on [REST Best Practices](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#successful_responses).
+
+4. **Libraries Used**:
+   - **Crypto** for password encryption.
+   - **Multer** for file upload.
+   - **mysql2** for database operations.
+
+5. **REST API Practices**:
+   - Follow the best practices outlined in [this guide]([https://restfulapi.net/](https://stackoverflow.blog/2020/03/02/best-practices-for-rest-api-design/).
+   - Ensure APIs are RESTful and maintain clean code standards.
+
+6. **For JS Clean Code**:
+   - Follow the best practices outlined in [this guide](https://github.com/ryanmcdermott/clean-code-javascript#error-handling).
+
+---
+
+## Installation and Setup
+1. Clone this repository.
+2. Install dependencies:
+   ```bash
+   npm install
+
