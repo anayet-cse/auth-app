@@ -68,7 +68,7 @@ This project provides the following functionalities:
    - **mysql2** for database operations.
 
 5. **REST API Practices**:
-   - Follow the best practices outlined in [this guide]([https://restfulapi.net/](https://stackoverflow.blog/2020/03/02/best-practices-for-rest-api-design/).
+   - Follow the best practices outlined in [this guide](https://stackoverflow.blog/2020/03/02/best-practices-for-rest-api-design/).
    - Ensure APIs are RESTful and maintain clean code standards.
 
 6. **For JS Clean Code**:
